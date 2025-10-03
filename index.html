@@ -1,10 +1,1125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Bye</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cerium Hub</title>
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💎</text></svg>">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.41.0/min/vs/loader.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #a855f7;
+            --primary-glow: rgba(168, 85, 247, 0.4);
+            --bg-color: #0d0c1d;
+            --card-bg: #1a192b;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-color: #f9fafb;
+            --text-muted: #9ca3af;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --ui-bg: #111217;
+            --ui-bg-lighter: #1d1e25;
+            --ui-border: #2a2c37;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body.modal-open {
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        section {
+            padding: 100px 0;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 60px auto;
+            line-height: 1.7;
+        }
+
+        #star-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: var(--bg-color) radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle 5s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        header {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            max-width: 900px;
+            z-index: 1000;
+            transition: all 0.4s ease;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(26, 25, 43, 0.5);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 9999px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-brand i {
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+        }
+
+        .nav-button {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-color);
+            background: rgba(255, 255, 255, 0.1);
+            text-decoration: none;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-button:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: 0;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 120px 20px;
+        }
+
+        .hero h1 {
+            font-size: 5rem;
+            font-weight: 800;
+            margin-bottom: 40px;
+            line-height: 1.15;
+            max-width: 900px;
+            letter-spacing: -0.02em;
+            text-shadow: 0 0 50px rgba(168, 85, 247, 0.3);
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero .highlight {
+            color: var(--primary-color);
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .hero-button {
+            padding: 16px 36px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 9999px;
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hero-button.primary {
+            background-color: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        .hero-button.primary:hover {
+            background-color: #d1d5db;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-button.secondary {
+            background-color: rgba(26, 25, 43, 0.5);
+            color: var(--text-color);
+        }
+
+        .hero-button.secondary:hover {
+            background-color: var(--card-bg);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .ui-glow-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 2000px;
+        }
+
+        .ui-glow-container::before {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+            filter: blur(100px);
+            z-index: -1;
+            animation: glow-pulse 6s infinite ease-in-out;
+        }
+
+        @keyframes glow-pulse {
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .cerium-ui-window {
+            width: 100%;
+            max-width: 900px;
+            background: var(--ui-bg);
+            border: 1px solid var(--ui-border);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: rotateX(5deg) rotateY(-5deg) scale(0.95);
+            transition: transform 0.5s ease;
+        }
+
+        .ui-glow-container:hover .cerium-ui-window {
+            transform: rotateX(0) rotateY(0) scale(1);
+        }
+
+        .ui-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--ui-bg-lighter);
+            border-bottom: 1px solid var(--ui-border);
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-info .logo-icon {
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            color: #000;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            border-radius: 4px;
+        }
+
+        .header-info h3 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .header-info span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ui-tag {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .ui-tag.version {
+            background-color: var(--success-color);
+            color: #fff;
+        }
+
+        .ui-tag.beta {
+            background-color: #3b82f6;
+            color: #fff;
+        }
+
+        .ui-tag.time {
+            background-color: var(--danger-color);
+            color: #fff;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            margin-left: 8px;
+        }
+
+        .header-buttons i {
+            padding: 4px;
+            cursor: pointer;
+        }
+
+        .ui-search-bar {
+            padding: 12px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #000;
+            border: 1px solid var(--ui-border);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-input input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-color);
+            width: 100%;
+        }
+
+        .ui-body {
+            display: flex;
+            flex-grow: 1;
+            border-top: 1px solid var(--ui-border);
+        }
+
+        .ui-sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            padding: 16px;
+            border-right: 1px solid var(--ui-border);
+        }
+
+        .sidebar-group h4 {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 16px 8px 8px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: 0.2s ease;
+        }
+
+        .sidebar-item:hover {
+            background: var(--ui-bg-lighter);
+            color: var(--text-color);
+        }
+
+        .sidebar-item.active {
+            background: var(--ui-bg-lighter);
+            color: var(--text-color);
+        }
+
+        .sidebar-item i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .ui-main-panel {
+            flex-grow: 1;
+            padding: 24px;
+        }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .feature-item span {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #374151;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        .input-field {
+            background: var(--ui-bg-lighter);
+            border: 1px solid var(--ui-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            width: 80px;
+            text-align: right;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        .action-button {
+            background: var(--ui-bg-lighter);
+            border: 1px solid var(--ui-border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .action-button:hover {
+            background: var(--ui-border);
+            color: var(--text-color);
+        }
+
+        .ui-footer {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--ui-border);
+        }
+
+        .footer-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+
+        .footer-username {
+            font-weight: 600;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .status-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .status-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-card .icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            width: 50px;
+            text-align: center;
+        }
+
+        .status-card-content h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+
+        .status-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+
+        .status-dot.online {
+            background-color: var(--success-color);
+            box-shadow: 0 0 8px var(--success-color);
+        }
+
+        .status-dot.degraded {
+            background-color: var(--warning-color);
+            box-shadow: 0 0 8px var(--warning-color);
+        }
+
+        .status-dot.offline {
+            background-color: var(--danger-color);
+            box-shadow: 0 0 8px var(--danger-color);
+            animation: none;
+        }
+
+        .status-display.online p {
+            color: var(--success-color);
+        }
+
+        .status-display.degraded p {
+            color: var(--warning-color);
+        }
+
+        .status-display.offline p {
+            color: var(--danger-color);
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% {
+                opacity: 0.7;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 60px 20px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 80px;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer-socials a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 1.8rem;
+            transition: color 0.3s, transform 0.3s;
+            display: inline-block;
+        }
+
+        .footer-socials a:hover {
+            color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(13, 12, 29, 0.7);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 600px;
+            padding: 24px;
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--text-color);
+        }
+
+        #editor-container {
+            width: 100%;
+            height: 120px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .modal-actions {
+            margin-top: 16px;
+            display: flex;
+        }
+
+        .copy-button {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .copy-button:hover {
+            background: #9333ea;
+        }
+
+        @media (max-width: 992px) {
+            .nav-links,
+            .nav-button {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            header {
+                width: 100%;
+                top: 0;
+                border-radius: 0;
+                background: rgba(13, 12, 29, 0.8);
+            }
+
+            .navbar {
+                border-radius: 0;
+                padding: 12px 24px;
+                width: 100%;
+                border: 0;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .ui-body {
+                flex-direction: column;
+            }
+
+            .ui-sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--ui-border);
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>astrvx owns this shit now</h1>
+
+    <div id="star-background"></div>
+
+    <header id="main-header">
+        <nav class="navbar">
+            <a href="#" class="nav-brand"><i class="fa-solid fa-gem"></i> Cerium</a>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#status">Status</a></li>
+            </ul>
+            <a href="https://discord.gg/setR7wfMqx" target="_blank" rel="noopener noreferrer" class="nav-button">
+                <i class="fa-brands fa-discord"></i> Join Discord
+            </a>
+            <button class="mobile-menu-btn" aria-label="Open Menu"><i class="fa-solid fa-bars"></i></button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="home">
+            <div class="container">
+                <h1>Dominate the Pitch<br>with <span class="highlight">Cerium</span></h1>
+                <div class="hero-buttons">
+                    <button class="hero-button primary js-open-modal" data-modal-id="scriptModal">
+                        <i class="fa-solid fa-download"></i> Get The Script
+                    </button>
+                    <a href="https://discord.gg/setR7wfMqx" target="_blank" rel="noopener noreferrer" class="hero-button secondary">
+                        <i class="fa-brands fa-discord"></i> Join Community
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="container">
+            <div class="ui-glow-container">
+                <div class="cerium-ui-window">
+                    <div class="ui-header">
+                        <div class="header-info">
+                            <div class="logo-icon">C</div>
+                            <div>
+                                <h3>Cerium Beta</h3><span>By ASTRVX</span>
+                            </div>
+                        </div>
+                        <div class="header-controls">
+                            <div class="ui-tag version">v1.6.4</div>
+                            <div class="ui-tag beta">Beta</div>
+                            <div class="ui-tag time">23:30</div>
+                            <div class="header-buttons">
+                                <i class="fa-solid fa-gear"></i><i class="fa-solid fa-minus"></i><i class="fa-solid fa-xmark"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui-search-bar">
+                        <div class="search-input">
+                            <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+                            <input type="text" placeholder="Search...">
+                        </div>
+                    </div>
+                    <div class="ui-body">
+                        <div class="ui-sidebar">
+                            <div class="sidebar-group">
+                                <h4>Main</h4>
+                                <a href="#" class="sidebar-item"><i class="fa-solid fa-house"></i> Main</a>
+                                <a href="#" class="sidebar-item"><i class="fa-solid fa-eye"></i> Visuals</a>
+                                <a href="#" class="sidebar-item"><i class="fa-solid fa-user"></i> Player</a>
+                            </div>
+                            <div class="sidebar-group">
+                                <h4>Gameplay</h4>
+                                <a href="#" class="sidebar-item"><i class="fa-solid fa-shield-halved"></i> Goalkeeper</a>
+                                <a href="#" class="sidebar-item active"><i class="fa-solid fa-futbol"></i> Ball</a>
+                                <a href="#" class="sidebar-item"><i class="fa-solid fa-users"></i> Teams</a>
+                            </div>
+                        </div>
+                        <div class="ui-main-panel">
+                            <div class="feature-item">
+                                <span>Power Shot</span>
+                                <label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label>
+                            </div>
+                            <div class="feature-item">
+                                <span>Enable Angle Bar</span>
+                                <label class="toggle-switch"><input type="checkbox"><span class="slider"></span></label>
+                            </div>
+                            <div class="feature-item">
+                                <span>Shot Power (Max 200)</span>
+                                <input class="input-field" type="text" value="200">
+                            </div>
+                            <div class="feature-item">
+                                <span>Vertical Boost</span>
+                                <input class="input-field" type="text" value="1">
+                            </div>
+                            <div class="feature-item">
+                                <span>Freeze Ball</span>
+                                <button class="action-button">Q</button>
+                            </div>
+                            <div class="feature-item">
+                                <span>Bring Ball</span>
+                                <button class="action-button"><i class="fa-solid fa-location-crosshairs"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui-footer">
+                        <img class="footer-avatar" src="https://i.pravatar.cc/40?u=a" alt="User Avatar">
+                        <span class="footer-username">ComeHere22221</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="status" class="container">
+            <h2 class="section-title">System Status</h2>
+            <p class="section-subtitle">We monitor our systems 24/7 to ensure maximum uptime and reliability. Check the current operational status below.</p>
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="icon"><i class="fa-brands fa-discord"></i></div>
+                    <div class="status-card-content">
+                        <h3>Discord Bot</h3>
+                        <div class="status-display online"><span class="status-dot online"></span>
+                            <p>Operational</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="icon"><i class="fa-solid fa-microchip"></i></div>
+                    <div class="status-card-content">
+                        <h3>Script Core</h3>
+                        <div class="status-display online"><span class="status-dot online"></span>
+                            <p>Operational</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="icon"><i class="fa-solid fa-satellite-dish"></i></div>
+                    <div class="status-card-content">
+                        <h3>API Services</h3>
+                        <div class="status-display online"><span class="status-dot online"></span>
+                            <p>Operational</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="icon"><i class="fa-solid fa-user-shield"></i></div>
+                    <div class="status-card-content">
+                        <h3>Authentication</h3>
+                        <div class="status-display online"><span class="status-dot online"></span>
+                            <p>Operational</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="icon"><i class="fa-solid fa-shield-virus"></i></div>
+                    <div class="status-card-content">
+                        <h3>Obfuscation</h3>
+                        <div class="status-display online"><span class="status-dot online"></span>
+                            <p>Operational</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="icon"><i class="fa-solid fa-server"></i></div>
+                    <div class="status-card-content">
+                        <h3>Game Servers</h3>
+                        <div class="status-display degraded"><span class="status-dot degraded"></span>
+                            <p>Degraded Performance</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="nav-brand"><i class="fa-solid fa-gem"></i> Cerium</div>
+            <div class="footer-socials">
+                <a href="https://discord.gg/setR7wfMqx" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord"><i class="fa-brands fa-discord"></i></a>
+            </div>
+            <p>&copy; 2024 Cerium. All Rights Reserved. Not affiliated with RF24.</p>
+        </div>
+    </footer>
+
+    <div class="modal-overlay" id="scriptModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Get The Script</h2>
+                <button class="modal-close-btn js-close-modal" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="editor-container"></div>
+            <div class="modal-actions">
+                <button class="copy-button" id="copyScriptBtn">
+                    <i class="fa-regular fa-copy"></i>
+                    <span>Copy Script</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const starBackground = document.getElementById('star-background');
+            const starCount = 200;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 2.5;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.animationDuration = `${3 + Math.random() * 3}s`;
+                starBackground.appendChild(star);
+            }
+
+            const loadstring = `loadstring(game:HttpGet("https://raw.githubusercontent.com/LevYashinXD/Cerium/refs/heads/main/RF24",true))()`;
+            let editorInstance = null;
+
+            require.config({
+                paths: {
+                    'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.41.0/min/vs'
+                }
+            });
+
+            const openModalButtons = document.querySelectorAll('.js-open-modal');
+            const closeModalButtons = document.querySelectorAll('.js-close-modal');
+            const overlays = document.querySelectorAll('.modal-overlay');
+
+            const openModal = (modalId) => {
+                const modal = document.getElementById(modalId);
+                if (!modal) return;
+
+                document.body.classList.add('modal-open');
+                modal.classList.add('active');
+
+                if (modalId === 'scriptModal' && !editorInstance) {
+                    require(['vs/editor/editor.main'], function() {
+                        editorInstance = monaco.editor.create(document.getElementById('editor-container'), {
+                            value: loadstring,
+                            language: 'lua',
+                            theme: 'vs-dark',
+                            automaticLayout: true,
+                            minimap: {
+                                enabled: false
+                            },
+                            wordWrap: 'on',
+                            readOnly: true,
+                            scrollbar: {
+                                vertical: 'hidden'
+                            }
+                        });
+                    });
+                }
+            };
+
+            const closeModal = () => {
+                document.body.classList.remove('modal-open');
+                overlays.forEach(overlay => overlay.classList.remove('active'));
+            };
+
+            openModalButtons.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const modalId = button.dataset.modalId;
+                    openModal(modalId);
+                });
+            });
+
+            closeModalButtons.forEach(button => button.addEventListener('click', closeModal));
+
+            overlays.forEach(overlay => {
+                overlay.addEventListener('click', (event) => {
+                    if (event.target === overlay) {
+                        closeModal();
+                    }
+                });
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === "Escape" && document.body.classList.contains('modal-open')) {
+                    closeModal();
+                }
+            });
+
+            const copyBtn = document.getElementById('copyScriptBtn');
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(loadstring).then(() => {
+                    const icon = copyBtn.querySelector('i');
+                    const text = copyBtn.querySelector('span');
+                    icon.className = 'fa-solid fa-check';
+                    text.textContent = 'Copied!';
+                    setTimeout(() => {
+                        icon.className = 'fa-regular fa-copy';
+                        text.textContent = 'Copy Script';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy script: ', err);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
