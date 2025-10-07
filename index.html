@@ -36,6 +36,7 @@
             background-size: 30px 30px;
         }
         body.no-scroll { overflow: hidden; }
+        .content-transition { transition: opacity 0.3s ease-in-out; }
         .background-glow {
             position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
             width: 1000px; height: 800px; background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.15), transparent 70%);
@@ -57,13 +58,13 @@
             text-decoration: none; display: flex; align-items: center; gap: 10px; z-index: 1001;
         }
         .nav-brand i { color: var(--primary); }
-        .nav-links { display: flex; gap: 1rem; list-style: none; }
-        .nav-links a {
+        .nav-links { display: flex; align-items: center; gap: 1rem; list-style: none; }
+        .nav-links > a {
             color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9rem;
             padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease;
         }
-        .nav-links a:hover { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
-        .nav-links a.active { color: var(--text-primary); }
+        .nav-links > a:hover { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+        .nav-links > a.active { color: var(--text-primary); }
         .nav-cta {
             padding: 10px 22px; font-size: 0.9rem; font-weight: 600; color: var(--text-primary);
             background: rgba(255, 255, 255, 0.1); text-decoration: none; border-radius: 9999px;
@@ -74,6 +75,33 @@
             display: none; background: transparent; border: 0; color: var(--text-primary); 
             font-size: 1.5rem; cursor: pointer; z-index: 1001;
         }
+        .nav-item.dropdown { position: relative; }
+        .dropdown-toggle {
+            background: transparent; border: none; font-family: inherit; cursor: pointer;
+            color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9rem;
+            padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .dropdown-toggle:hover { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+        .dropdown-toggle i { font-size: 0.7rem; transition: transform 0.3s ease; }
+        .dropdown.active .dropdown-toggle i { transform: rotate(180deg); }
+        .dropdown-menu {
+            position: absolute; top: calc(100% + 10px); left: 0;
+            background-color: var(--bg-light); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); padding: 8px;
+            min-width: 160px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            opacity: 0; visibility: hidden; transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+            z-index: 1100;
+        }
+        .dropdown.active .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown-item {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 10px 12px; border-radius: 8px; font-size: 0.9rem; font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .dropdown-item:hover { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+        .dropdown-item.active { color: var(--primary); font-weight: 600; }
         .mobile-nav {
             position: fixed; top: 0; right: 0; width: 100%; height: 100%;
             background: rgba(10, 10, 16, 0.9); backdrop-filter: blur(10px);
@@ -84,16 +112,37 @@
             transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         .mobile-nav.open { transform: translateX(0); }
-        .mobile-nav a {
+        .mobile-nav > a {
             color: var(--text-secondary); text-decoration: none; font-size: 1.5rem;
             font-weight: 600; transition: color 0.3s;
         }
-        .mobile-nav a:hover, .mobile-nav a.active { color: var(--text-primary); }
+        .mobile-nav > a:hover, .mobile-nav > a.active { color: var(--text-primary); }
         .mobile-nav .nav-cta {
             font-size: 1.2rem; padding: 12px 28px;
             background: var(--primary); border: none;
         }
         .mobile-nav .nav-cta:hover { background: var(--primary-light); color: #fff; }
+        .mobile-nav-item { width: 80%; text-align: center; }
+        .mobile-dropdown-toggle {
+            color: var(--text-secondary); text-decoration: none; font-size: 1.5rem;
+            font-weight: 600; transition: color 0.3s; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .mobile-dropdown-toggle i { font-size: 1rem; transition: transform 0.3s ease; }
+        .mobile-nav-item.active .mobile-dropdown-toggle { color: var(--text-primary); }
+        .mobile-nav-item.active .mobile-dropdown-toggle i { transform: rotate(180deg); }
+        .mobile-dropdown-menu {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.4s ease-in-out;
+            display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .mobile-nav-item.active .mobile-dropdown-menu { max-height: 200px; }
+        .mobile-dropdown-menu a {
+            font-size: 1.1rem; color: var(--text-secondary); font-weight: 500;
+            padding: 8px; text-decoration: none;
+        }
+        .mobile-dropdown-menu a.active { color: var(--primary); }
         .hero { padding: 180px 0 160px; text-align: center; position: relative; }
         .hero-tag {
             display: inline-block; margin-bottom: 1.5rem; padding: 6px 16px; border: 1px solid var(--border-color);
@@ -104,10 +153,6 @@
         .hero h1 {
             font-size: clamp(3rem, 6vw, 4.5rem); font-weight: 800; letter-spacing: -0.04em;
             line-height: 1.1; max-width: 800px; margin: 0 auto;
-        }
-        .hero .highlight {
-            background: linear-gradient(90deg, var(--primary-light), var(--primary));
-            background-clip: text; -webkit-background-clip: text; color: transparent;
         }
         .hero p {
             font-size: 1.25rem; color: var(--text-secondary); max-width: 650px;
@@ -174,7 +219,7 @@
         .pricing-card .btn { width: 100%; justify-content: center; margin-top: auto; }
         .payments-container { text-align: center; margin-top: 4rem; }
         .payments-container h4 { font-size: 1.2rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 1.5rem; }
-        .payment-methods { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+        .payment-methods { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
         .payment-method {
             background-color: var(--bg-light); border: 1px solid var(--border-color);
             border-radius: var(--radius-md); padding: 1rem; width: 100px;
@@ -231,7 +276,7 @@
         #back-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
         #back-to-top:hover { background-color: var(--primary-light); }
         @media (max-width: 992px) {
-            .nav-links, .nav-cta { display: none; }
+            .nav-links, .nav-cta-desktop { display: none; }
             .mobile-menu-btn { display: block; }
         }
         @media (max-width: 768px) {
@@ -254,17 +299,35 @@
         <div class="container navbar">
             <a href="#home" class="nav-brand"><i class="fa-solid fa-gem"></i> Cerium</a>
             <nav class="nav-links">
+                <div class="nav-item dropdown">
+                    <button class="dropdown-toggle" aria-label="Select a game">
+                        <span>Games</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item active" data-game="rf24">RF24</a>
+                    </div>
+                </div>
                 <a href="#features">Features</a>
                 <a href="#pricing">Pricing</a>
                 <a href="#reliability">Reliability</a>
             </nav>
-            <a href="https://discord.gg/setR7wfMqx" target="_blank" rel="noopener noreferrer" class="nav-cta">Join Discord</a>
+            <a href="https://discord.gg/setR7wfMqx" target="_blank" rel="noopener noreferrer" class="nav-cta nav-cta-desktop">Join Discord</a>
             <button class="mobile-menu-btn" aria-label="Open Menu">
                 <i class="fa-solid fa-bars"></i>
             </button>
         </div>
     </header>
     <div class="mobile-nav">
+        <div class="mobile-nav-item">
+            <div class="mobile-dropdown-toggle">
+                <span>Games</span>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+            <div class="mobile-dropdown-menu">
+                <a href="#" class="active" data-game="rf24">RF24</a>
+            </div>
+        </div>
         <a href="#features">Features</a>
         <a href="#pricing">Pricing</a>
         <a href="#reliability">Reliability</a>
@@ -272,10 +335,10 @@
     </div>
     <main>
         <section class="hero" id="home">
-            <div class="container">
-                <div class="hero-tag fade-in">The <span>#1</span> Script for RF24</div>
-                <h1 class="fade-in" style="transition-delay: 0.1s;">Unleash Your True Potential on the Pitch.</h1>
-                <p class="fade-in" style="transition-delay: 0.2s;">Cerium delivers unmatched performance, precision, and power. Stop playing the game. Start dominating it.</p>
+            <div class="container content-transition">
+                <div id="hero-tag" class="hero-tag fade-in">The <span>#1</span> Script for RF24</div>
+                <h1 id="hero-title" class="fade-in" style="transition-delay: 0.1s;">Unleash Your True Potential on the Pitch.</h1>
+                <p id="hero-desc" class="fade-in" style="transition-delay: 0.2s;">Cerium delivers unmatched performance, precision, and power. Stop playing the game. Start dominating it.</p>
                 <div class="hero-buttons fade-in" style="transition-delay: 0.3s;">
                     <a href="https://discord.gg/setR7wfMqx" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
                         <i class="fa-brands fa-discord"></i> Join to Get Script
@@ -292,36 +355,36 @@
             </div>
         </section>
         <section id="features">
-            <div class="container">
+            <div class="container content-transition">
                 <div class="section-header fade-in">
                     <h2>Built For Victory.</h2>
                     <p>Every feature is meticulously crafted to give you a decisive edge, wrapped in an intuitive and clean interface.</p>
                 </div>
-                <div class="feature-highlight fade-in">
+                <div id="feature-1" class="feature-highlight fade-in">
                     <div class="feature-text">
-                        <h3>Advanced Ball Control</h3>
-                        <p>Manipulate the ball with god-like precision. From power shots that defy physics to freezing the ball on command, you control the flow of the game.</p>
+                        <h3 id="feature-1-title">Advanced Ball Control</h3>
+                        <p id="feature-1-desc">Manipulate the ball with god-like precision. From power shots that defy physics to freezing the ball on command, you control the flow of the game.</p>
                     </div>
-                    <div class="feature-visual"><i class="fa-solid fa-futbol"></i></div>
+                    <div class="feature-visual"><i id="feature-1-icon" class="fa-solid fa-futbol"></i></div>
                 </div>
-                <div class="feature-highlight fade-in">
+                <div id="feature-2" class="feature-highlight fade-in">
                     <div class="feature-text">
-                        <h3>Auto-Goalkeeper</h3>
-                        <p>Auto catch and Goalkeep Anywhere</p>
+                        <h3 id="feature-2-title">Auto-Goalkeeper</h3>
+                        <p id="feature-2-desc">Auto catch and Goalkeep Anywhere</p>
                     </div>
-                    <div class="feature-visual"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="feature-visual"><i id="feature-2-icon" class="fa-solid fa-shield-halved"></i></div>
                 </div>
-                <div class="feature-highlight fade-in">
+                <div id="feature-3" class="feature-highlight fade-in">
                     <div class="feature-text">
-                        <h3>Total Awareness with ESP</h3>
-                        <p>See everything. Track players and the ball through any obstacle. Gain complete situational awareness and anticipate every move your opponents make.</p>
+                        <h3 id="feature-3-title">Total Awareness with ESP</h3>
+                        <p id="feature-3-desc">See everything. Track players and the ball through any obstacle. Gain complete situational awareness and anticipate every move your opponents make.</p>
                     </div>
-                    <div class="feature-visual"><i class="fa-solid fa-eye"></i></div>
+                    <div class="feature-visual"><i id="feature-3-icon" class="fa-solid fa-eye"></i></div>
                 </div>
             </div>
         </section>
         <section id="pricing">
-            <div class="container">
+            <div class="container content-transition">
                 <div class="section-header fade-in">
                     <h2>Simple, Transparent Pricing</h2>
                     <p>Choose the plan that suits your needs. Get started for free or unlock the ultimate experience with Premium.</p>
@@ -333,7 +396,7 @@
                             <span>$0</span>
                             <p>Free Forever</p>
                         </div>
-                        <ul class="features-list">
+                        <ul id="free-features-list" class="features-list">
                             <li><i class="fa-solid fa-check-circle"></i><span>Basic Ball Control</span></li>
                             <li><i class="fa-solid fa-check-circle"></i><span>Basic Player ESP</span></li>
                             <li><i class="fa-solid fa-times-circle"></i><span>Limited Access to Advanced Features</span></li>
@@ -344,10 +407,10 @@
                         <div class="recommended-badge">Recommended</div>
                         <h3>Cerium Premium</h3>
                         <div class="price-display">
-                            <span>$5</span>
+                            <span id="premium-price">$5</span>
                             <p>One-Time Payment</p>
                         </div>
-                        <ul class="features-list">
+                        <ul id="premium-features-list" class="features-list">
                             <li><i class="fa-solid fa-check-circle"></i><span><b>All Free Features, plus:</b></span></li>
                             <li><i class="fa-solid fa-check-circle"></i><span>Advanced Ball Control</span></li>
                             <li><i class="fa-solid fa-check-circle"></i><span>Intelligent Auto-Goalkeeper</span></li>
@@ -360,9 +423,10 @@
                 <div class="payments-container fade-in">
                     <h4>We Accept</h4>
                     <div class="payment-methods">
-                        <div class="payment-method"><i class="fa-brands fa-paypal" style="color: #00457C;"></i><span>PayPal</span></div>
                         <div class="payment-method"><i class="fa-solid fa-credit-card" style="color: #6366f1;"></i><span>Card</span></div>
                         <div class="payment-method"><i class="fa-solid fa-dollar-sign" style="color: #00d54f;"></i><span>Cash App</span></div>
+                        <div class="payment-method"><i class="fa-solid fa-rocket" style="color: #f47fff;"></i><span>Server Boost</span></div>
+                        <div class="payment-method"><i class="fa-brands fa-discord" style="color: #5865F2;"></i><span>2x Nitro Basic</span></div>
                     </div>
                 </div>
             </div>
@@ -400,6 +464,30 @@
     <a href="#home" id="back-to-top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></a>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const gameData = {
+                rf24: {
+                    tag: 'The <span>#1</span> Script for RF24',
+                    title: 'Unleash Your True Potential on the Pitch.',
+                    desc: 'Cerium delivers unmatched performance, precision, and power. Stop playing the game. Start dominating it.',
+                    features: [
+                        { title: 'Advanced Ball Control', desc: 'Manipulate the ball with god-like precision. From power shots that defy physics to freezing the ball on command, you control the flow of the game.', icon: 'fa-solid fa-futbol' },
+                        { title: 'Auto-Goalkeeper', desc: 'Auto catch and Goalkeep Anywhere', icon: 'fa-solid fa-shield-halved' },
+                        { title: 'Total Awareness with ESP', desc: 'See everything. Track players and the ball through any obstacle. Gain complete situational awareness and anticipate every move your opponents make.', icon: 'fa-solid fa-eye' }
+                    ],
+                    freeFeatures: [
+                        'Basic Ball Control',
+                        'Basic Player ESP',
+                    ],
+                    premiumPrice: '$5',
+                    premiumFeatures: [
+                        'Advanced Ball Control',
+                        'Intelligent Auto-Goalkeeper',
+                        'Full Player Modifications',
+                        'Priority Discord Support'
+                    ]
+                }
+            };
+
             const header = document.getElementById('main-header');
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); }});
@@ -409,7 +497,7 @@
             const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
             const mobileNav = document.querySelector('.mobile-nav');
             const mobileMenuIcon = mobileMenuBtn.querySelector('i');
-            const mobileNavLinks = mobileNav.querySelectorAll('a');
+            const mobileNavLinks = mobileNav.querySelectorAll('a:not([data-game])');
             const toggleMenu = () => {
                 const isOpen = mobileNav.classList.toggle('open');
                 document.body.classList.toggle('no-scroll', isOpen);
@@ -418,16 +506,38 @@
             mobileMenuBtn.addEventListener('click', toggleMenu);
             mobileNavLinks.forEach(link => {
                 link.addEventListener('click', () => {
-                    if (mobileNav.classList.contains('open')) {
+                    if (mobileNav.classList.contains('open') && !link.closest('.mobile-nav-item')) {
                         toggleMenu();
                     }
                 });
             });
 
+            const desktopDropdown = document.querySelector('.nav-item.dropdown');
+            if (desktopDropdown) {
+                const toggle = desktopDropdown.querySelector('.dropdown-toggle');
+                toggle.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    desktopDropdown.classList.toggle('active');
+                });
+            }
+            window.addEventListener('click', () => {
+                if (desktopDropdown && desktopDropdown.classList.contains('active')) {
+                    desktopDropdown.classList.remove('active');
+                }
+            });
+
+            const mobileDropdown = document.querySelector('.mobile-nav-item');
+            if(mobileDropdown) {
+                const toggle = mobileDropdown.querySelector('.mobile-dropdown-toggle');
+                toggle.addEventListener('click', () => {
+                    mobileDropdown.classList.toggle('active');
+                });
+            }
+
             const backToTopBtn = document.getElementById('back-to-top');
             const sections = document.querySelectorAll('section[id]');
-            const navLinks = document.querySelectorAll('.nav-links a');
-            const mobileLinks = document.querySelectorAll('.mobile-nav a[href^="#"]');
+            const navLinks = document.querySelectorAll('.nav-links > a');
+            const mobileLinks = document.querySelectorAll('.mobile-nav > a[href^="#"]');
             const onScroll = () => {
                 header.classList.toggle('scrolled', window.scrollY > 50);
                 if (backToTopBtn) {
