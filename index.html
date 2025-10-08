@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cerium Hub</title>
     <meta name="description" content="Dominate RF24 with Cerium, the #1 script for advanced ball control, auto-goalkeeping, and full ESP. Get instant access and start winning today.">
-    <meta property="og:title" content="Cerium Hub">
+    <meta property="og:title" content="Cerium Hub - The Ultimate Script for RF24">
     <meta property="og:description" content="Unmatched performance, precision, and power. Stop playing the game. Start dominating it.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://cerium.rip/">
+    <meta property="og:url" content="https://your-website-url.com/">
     <meta property="og:image" content="https://cdn.discordapp.com/attachments/1415510139867238434/1425264262862868520/cab94df1-e5b7-4a17-9665-11eeb84d1831.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Cerium Hub - The Ultimate Script for RF24">
@@ -230,8 +230,8 @@
         }
         .section-header p { font-size: 1.1rem; color: var(--text-secondary); line-height: 1.6; }
         .pricing-grid {
-            display: grid; grid-template-columns: 1fr 1fr;
-            align-items: flex-start; gap: 2rem; max-width: 900px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            align-items: flex-start; gap: 2rem;
         }
         .pricing-card {
             background-color: var(--bg-light); border: 1px solid var(--border-color);
@@ -239,9 +239,12 @@
             height: 100%; display: flex; flex-direction: column; transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .pricing-card:hover { transform: translateY(-5px); }
-        .pricing-card.premium {
+        .pricing-card.premium, .pricing-card.ultimate {
             border-color: var(--primary); position: relative;
             box-shadow: 0 0 30px rgba(168, 85, 247, 0.2);
+        }
+        .pricing-card.ultimate {
+            box-shadow: 0 0 50px rgba(168, 85, 247, 0.4);
         }
         .recommended-badge {
             position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
@@ -252,6 +255,20 @@
         .price-display { margin-bottom: 1.5rem; }
         .price-display span { font-size: 3.5rem; font-weight: 700; color: var(--primary); transition: opacity 0.3s ease; }
         .price-display p { color: var(--text-secondary); margin-top: -5px; }
+        .plan-selector {
+            display: flex; background-color: rgba(0,0,0,0.2);
+            border-radius: 999px; padding: 6px; margin-bottom: 1.5rem;
+        }
+        .plan-btn {
+            flex: 1; background: transparent; border: none;
+            color: var(--text-secondary); font-weight: 600; font-size: 0.8rem;
+            padding: 8px 10px; border-radius: 999px; cursor: pointer;
+            white-space: nowrap; transition: all 0.3s ease;
+        }
+        .plan-btn.active {
+            background-color: var(--primary); color: #fff;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+        }
         .features-list {
             list-style: none; text-align: left; margin: 0 0 2rem; display: flex;
             flex-direction: column; gap: 1rem; flex-grow: 1;
@@ -319,6 +336,9 @@
         }
         #back-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
         #back-to-top:hover { background-color: var(--primary-light); }
+        @media (max-width: 1024px) {
+            .pricing-grid { grid-template-columns: 1fr; max-width: 450px; }
+        }
         @media (max-width: 992px) {
             .nav-links, .nav-actions { display: none; }
             .mobile-menu-btn { display: block; }
@@ -333,7 +353,6 @@
             .feature-highlight:nth-child(even) .feature-text { order: 0; }
             .feature-text { text-align: center; }
             .feature-visual { padding: 2rem; }
-            .pricing-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -452,7 +471,7 @@
                     <p>Choose the plan that suits your needs. Get started for free or unlock the ultimate experience with Premium.</p>
                 </div>
                 <div class="pricing-grid">
-                    <div class="pricing-card fade-in" style="transition-delay: 0.1s;">
+                    <div class="pricing-card fade-in">
                         <h3>Cerium Free</h3>
                         <div class="price-display">
                             <span id="free-price">$0</span>
@@ -465,12 +484,18 @@
                         </ul>
                         <a href="https://discord.gg/setR7wfMqx" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Join to Get Free Version</a>
                     </div>
-                    <div class="pricing-card premium fade-in" style="transition-delay: 0.2s;">
+                    <div class="pricing-card premium fade-in" style="transition-delay: 0.1s;">
                         <div class="recommended-badge">Recommended</div>
                         <h3>Cerium Premium</h3>
+                        <div class="plan-selector" id="premium-plan-selector">
+                            <button class="plan-btn" data-plan="Daily" data-price="1">Daily</button>
+                            <button class="plan-btn" data-plan="Weekly" data-price="2">Weekly</button>
+                            <button class="plan-btn active" data-plan="Monthly" data-price="4">Monthly</button>
+                            <button class="plan-btn" data-plan="Lifetime" data-price="8">Lifetime</button>
+                        </div>
                         <div class="price-display">
-                            <span id="premium-price">$5</span>
-                            <p>One-Time Payment</p>
+                            <span id="premium-price">$4</span>
+                            <p id="premium-duration">Billed Monthly</p>
                         </div>
                         <ul class="features-list">
                             <li><i class="fa-solid fa-check-circle"></i><span><b>All Free Features, plus:</b></span></li>
@@ -479,7 +504,29 @@
                             <li><i class="fa-solid fa-check-circle"></i><span>Full Player Modifications</span></li>
                             <li><i class="fa-solid fa-check-circle"></i><span>Priority Discord Support</span></li>
                         </ul>
-                        <a href="https://discord.gg/setR7wfMqx" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Purchase in Discord</a>
+                        <a href="https://discord.gg/setR7wfMqx" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Purchase Premium</a>
+                    </div>
+                    <div class="pricing-card ultimate fade-in" style="transition-delay: 0.2s;">
+                        <div class="recommended-badge">++</div>
+                        <h3>Cerium ++</h3>
+                        <div class="plan-selector" id="ultimate-plan-selector">
+                            <button class="plan-btn" data-plan="Daily" data-price="2">Daily</button>
+                            <button class="plan-btn" data-plan="Weekly" data-price="5">Weekly</button>
+                            <button class="plan-btn active" data-plan="Monthly" data-price="7">Monthly</button>
+                            <button class="plan-btn" data-plan="Lifetime" data-price="15">Lifetime</button>
+                        </div>
+                        <div class="price-display">
+                            <span id="ultimate-price">$7</span>
+                            <p id="ultimate-duration">Billed Monthly</p>
+                        </div>
+                        <ul class="features-list">
+                            <li><i class="fa-solid fa-check-circle"></i><span><b>Everything in Premium, plus:</b></span></li>
+                            <li><i class="fa-solid fa-check-circle"></i><span>Early Access to Updates</span></li>
+                            <li><i class="fa-solid fa-check-circle"></i><span>Beta Access for New Games</span></li>
+                            <li><i class="fa-solid fa-check-circle"></i><span>Exclusive Discord Role</span></li>
+                            <li><i class="fa-solid fa-check-circle"></i><span>1-on-1 Priority Support</span></li>
+                        </ul>
+                        <a href="https://discord.gg/setR7wfMqx" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Purchase Cerium ++</a>
                     </div>
                 </div>
                 <div class="payments-container fade-in">
@@ -592,10 +639,18 @@
             window.addEventListener('scroll', onScroll);
 
             const apiKey = '3d71fe03d5e0ef968dc9467a'; 
-            const basePriceUSD = 5;
+            let premiumBasePriceUSD = 4;
+            let ultimateBasePriceUSD = 7;
+            let currentCurrency = 'USD';
+
             const premiumPriceEl = document.getElementById('premium-price');
             const freePriceEl = document.getElementById('free-price');
+            const ultimatePriceEl = document.getElementById('ultimate-price');
+            const premiumDurationEl = document.getElementById('premium-duration');
+            const ultimateDurationEl = document.getElementById('ultimate-duration');
             const currencyDropdowns = document.querySelectorAll('.custom-dropdown');
+            const premiumPlanSelector = document.getElementById('premium-plan-selector');
+            const ultimatePlanSelector = document.getElementById('ultimate-plan-selector');
             
             let exchangeRates = {};
             const currencySymbols = { USD: '$', EUR: '€', GBP: '£', JPY: '¥', CAD: '$', AUD: '$', BRL: 'R$' };
@@ -610,12 +665,9 @@
                         exchangeRates = data.conversion_rates;
                         populateCurrencyDropdowns();
                         currencyDropdowns.forEach(d => d.style.display = 'block');
-                    } else {
-                        throw new Error('API error: ' + data['error-type']);
-                    }
-                } catch (error) {
-                    console.error('Failed to fetch currency rates:', error);
-                }
+                        updateAllPrices();
+                    } else { throw new Error('API error: ' + data['error-type']); }
+                } catch (error) { console.error('Failed to fetch currency rates:', error); }
             }
 
             function populateCurrencyDropdowns() {
@@ -633,23 +685,23 @@
                     });
                 });
             }
-
-            function updatePrices(selectedCurrency) {
-                const rate = exchangeRates[selectedCurrency];
-                if (!rate) return;
-
-                const symbol = currencySymbols[selectedCurrency] || '';
-                const newPremiumPrice = (basePriceUSD * rate).toFixed(2);
+            
+            function updatePrice(element, basePrice) {
+                const rate = exchangeRates[currentCurrency] || 1;
+                const symbol = currencySymbols[currentCurrency] || '$';
+                const newPrice = (basePrice * rate).toFixed(2);
                 
-                premiumPriceEl.style.opacity = 0;
-                freePriceEl.style.opacity = 0;
-
+                element.style.opacity = 0;
                 setTimeout(() => {
-                    premiumPriceEl.textContent = symbol + newPremiumPrice;
-                    freePriceEl.textContent = symbol + (0 * rate).toFixed(2);
-                    premiumPriceEl.style.opacity = 1;
-                    freePriceEl.style.opacity = 1;
-                }, 300);
+                    element.textContent = symbol + newPrice;
+                    element.style.opacity = 1;
+                }, 150);
+            }
+
+            function updateAllPrices() {
+                updatePrice(freePriceEl, 0);
+                updatePrice(premiumPriceEl, premiumBasePriceUSD);
+                updatePrice(ultimatePriceEl, ultimateBasePriceUSD);
             }
 
             currencyDropdowns.forEach(dropdown => {
@@ -664,20 +716,44 @@
 
                 menu.addEventListener('click', (e) => {
                     if (e.target.tagName === 'LI') {
-                        const currency = e.target.dataset.value;
-                        updatePrices(currency);
+                        currentCurrency = e.target.dataset.value;
+                        updateAllPrices();
                         
                         currencyDropdowns.forEach(d => {
-                            d.querySelector('.selected-value').textContent = currency;
+                            d.querySelector('.selected-value').textContent = currentCurrency;
                             d.querySelectorAll('.dropdown-menu li').forEach(li => {
-                                li.classList.toggle('active', li.dataset.value === currency);
+                                li.classList.toggle('active', li.dataset.value === currentCurrency);
                             });
                         });
-                        
                         dropdown.classList.remove('active');
                     }
                 });
             });
+
+            function setupPlanSelector(selector, durationEl, basePriceVarSetter) {
+                if (!selector) return;
+                selector.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('plan-btn')) {
+                        const plan = e.target.dataset.plan;
+                        const newPrice = parseFloat(e.target.dataset.price);
+                        
+                        basePriceVarSetter(newPrice);
+
+                        selector.querySelectorAll('.plan-btn').forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+
+                        if (plan === 'Lifetime') {
+                            durationEl.textContent = 'One-Time Payment';
+                        } else {
+                            durationEl.textContent = `Billed ${plan}`;
+                        }
+                        updateAllPrices();
+                    }
+                });
+            }
+
+            setupPlanSelector(premiumPlanSelector, premiumDurationEl, (p) => premiumBasePriceUSD = p);
+            setupPlanSelector(ultimatePlanSelector, ultimateDurationEl, (p) => ultimateBasePriceUSD = p);
 
             window.addEventListener('click', (e) => {
                 const allDropdowns = document.querySelectorAll('.custom-dropdown, .nav-item.dropdown, .mobile-nav-item');
