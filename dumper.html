@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cerium Hub - Lua Dumper</title>
+    <style>
+        body { font-family: Consolas, monospace; background-color: #1e1e1e; color: #d4d4d4; }
+        .container { max-width: 1200px; margin: 2rem auto; display: flex; gap: 20px; height: 80vh; }
+        .panel { display: flex; flex-direction: column; flex: 1; }
+        textarea, pre { width: 100%; height: 100%; box-sizing: border-box; background-color: #252526; border: 1px solid #333; color: #d4d4d4; padding: 10px; font-size: 14px; }
+        button { background-color: #0e639c; color: white; border: none; padding: 15px; font-size: 18px; cursor: pointer; margin-top: 10px; }
+        button:disabled { background-color: #333; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Cerium Lua Dumper</h1>
+    <div class="container">
+        <div class="panel">
+            <label for="input-code">Obfuscated Code:</label>
+            <textarea id="input-code" placeholder="Paste your obfuscated script here..."></textarea>
+            <button id="dump-button">Deobfuscate</button>
+        </div>
+        <div class="panel">
+            <label for="output-code">Result:</label>
+            <pre id="output-code" style="white-space: pre-wrap;">Your result will appear here...</pre>
+        </div>
+    </div>
+
+    <script>
+        const dumpButton = document.getElementById('dump-button');
+        const inputCode = document.getElementById('input-code');
+        const outputCode = document.getElementById('output-code');
+        const DUMPER_API_URL = 'https://americans-wow-smithsonian-proposals.trycloudflare.com';
+
+        dumpButton.addEventListener('click', async () => {
+            const code = inputCode.value;
+            if (!code) return;
+
+            dumpButton.disabled = true;
+            outputCode.textContent = 'Deobfuscating, please wait...';
+
+            try {
+                const response = await fetch(DUMPER_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code })
+                });
+
+                const data = await response.json();
+                outputCode.textContent = response.ok ? (data.result || 'Empty result.') : `Error: ${data.error}`;
+
+            } catch (err) {
+                outputCode.textContent = 'Error: Could not connect to the dumper server. Is it running?';
+            } finally {
+                dumpButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
