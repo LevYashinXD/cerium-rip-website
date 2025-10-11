@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cerium Hub - Lua Dumper</title>
+    <title>Cerium Hub - Dashboard</title>
     
-    <meta name="description" content="A powerful, free Lua deobfuscator and dumper from Cerium Hub. Paste your obfuscated script to get a clean, readable result.">
+    <meta name="description" content="A powerful, free Lua deobfuscator and dumper from Cerium Hub.">
     <meta property="og:title" content="Cerium Hub - Lua Dumper">
     <meta property="og:description" content="A powerful, free Lua deobfuscator and dumper from Cerium Hub.">
     <meta property="og:image" content="https://cdn.discordapp.com/attachments/1415510139867238434/1425264262862868520/cab94df1-e5b7-4a17-9665-11eeb84d1831.png">
@@ -31,191 +31,182 @@
             --radius-lg: 16px;
         }
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
+        html, body { height: 100%; overflow: hidden; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-dark);
             color: var(--text-primary);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            overflow-x: hidden;
-            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
+            
+            background-image:
+                radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px),
+                radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px, 80px 80px;
+            background-position: 0 0, 20px 20px;
         }
-        .background-glow {
-            position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
-            width: 1000px; height: 800px; background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.15), transparent 70%);
-            filter: blur(120px); z-index: -1; pointer-events: none;
-        }
-        .container { width: 90%; max-width: 1400px; margin: 0 auto; }
-        header {
-            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
-            background-color: rgba(10, 10, 16, 0.7); backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
-        }
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
-        .nav-brand {
-            font-size: 1.5rem; font-weight: 700; color: var(--text-primary);
-            text-decoration: none; display: flex; align-items: center; gap: 10px;
-        }
-        .nav-brand i { color: var(--primary); }
-        .nav-links { display: flex; gap: 1rem; list-style: none; }
-        .nav-links a {
-            color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9rem;
-            padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease;
-        }
-        .nav-links a:hover { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
-        .dumper-section { padding-top: 140px; padding-bottom: 80px; }
-        .section-header { text-align: center; max-width: 700px; margin: 0 auto 3rem; }
-        .section-header h1, .section-header h2 {
-            font-size: clamp(2.5rem, 5vw, 3.25rem); font-weight: 700;
-            letter-spacing: -0.03em; margin-bottom: 1rem;
-        }
-        .section-header p { font-size: 1.1rem; color: var(--text-secondary); line-height: 1.6; }
-        .dumper-container {
-            display: flex; gap: 2rem;
-            height: calc(100vh - 320px); min-height: 500px;
-        }
-        .panel {
-            display: flex; flex-direction: column; flex: 1;
+        
+        .dashboard-layout { display: flex; height: 100%; background-color: transparent; }
+        
+        .sidebar {
+            width: 250px; flex-shrink: 0;
             background-color: var(--bg-light);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem 1rem;
+            display: flex; flex-direction: column;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1100;
+        }
+        .sidebar-header {
+            font-size: 1.5rem; font-weight: 700; text-decoration: none;
+            display: flex; align-items: center; gap: 10px;
+            padding: 0 0.5rem; margin-bottom: 2.5rem;
+            color: var(--text-primary);
+        }
+        .sidebar-header i { color: var(--primary); }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 0.75rem; flex-grow: 1; }
+        .sidebar-link {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; border-radius: 999px;
+            text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            color: var(--text-secondary); transition: all 0.2s ease;
+        }
+        .sidebar-link i { font-size: 1rem; width: 20px; text-align: center; }
+        .sidebar-link:hover { background-color: rgba(255, 255, 255, 0.03); color: var(--text-primary); }
+        .sidebar-link.active {
+            color: #fff;
+            background-color: var(--primary);
+            box-shadow: 0 5px 20px rgba(168, 85, 247, 0.3);
+        }
+        
+        .content-wrapper { flex-grow: 1; height: 100%; overflow-y: auto; position: relative; }
+        .app-header {
+            position: sticky; top: 1.5rem;
+            max-width: 400px;
+            margin: 0 auto 2.5rem auto;
+            background-color: rgba(16, 16, 24, 0.7);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            border-radius: 999px;
+            padding: 0.75rem 1.5rem;
+            display: flex; align-items: center;
+            z-index: 1050;
         }
-        .panel-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 1rem;
-        }
-        .panel-header label {
-            font-size: 1rem; font-weight: 500; color: var(--text-secondary);
-            margin: 0;
-        }
-        .panel-actions { display: flex; gap: 0.75rem; }
-        .editor-container {
-            flex-grow: 1;
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
-        .plain-editor {
-            width: 100%; height: 100%; flex-grow: 1;
-            box-sizing: border-box; background-color: var(--bg-dark);
-            border: 1px solid var(--border-color); border-radius: var(--radius-md);
-            color: var(--text-secondary); padding: 15px;
-            font-family: Consolas, 'Courier New', monospace; font-size: 0.9rem;
-            line-height: 1.6; resize: none;
-        }
-        .plain-editor.output { white-space: pre-wrap; word-wrap: break-word; overflow-y: auto; }
-        .btn {
-            padding: 14px 32px; font-size: 1rem; font-weight: 600; border-radius: 9999px;
-            text-decoration: none; border: 1px solid transparent; display: inline-flex;
-            align-items: center; justify-content: center; gap: 10px; cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            margin-top: 1.5rem;
-        }
-        .btn-primary { background-color: var(--primary); color: #fff; box-shadow: 0 0 20px rgba(168, 85, 247, 0.3); }
-        .btn-primary:hover { transform: translateY(-2px); background-color: var(--primary-light); box-shadow: 0 8px 30px rgba(168, 85, 247, 0.4); }
-        .btn:disabled {
-            background-color: var(--bg-light); color: var(--text-secondary);
-            cursor: not-allowed; transform: none; box-shadow: none;
-        }
-        .btn-icon {
-            background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary);
-            padding: 8px 12px; font-size: 0.8rem; font-weight: 500;
-            border-radius: var(--radius-md); margin-top: 0;
-            cursor: pointer;
-        }
-        .btn-icon:hover:not(:disabled) { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
-        .btn-icon:disabled { opacity: 0.5; }
-        .timing-info {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-left: auto;
-            margin-right: 1rem;
-        }
-        .fa-spinner { animation: fa-spin 1s linear infinite; }
-        @keyframes fa-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .mobile-menu-btn { display: none; background: none; border: none; color: var(--text-primary); font-size: 1.5rem; cursor: pointer; margin-right: 1rem; }
+        .view-title { font-size: 1.25rem; font-weight: 600; text-align: center; flex-grow: 1; }
+        
+        .main-content { padding: 0 2.5rem 2.5rem; }
+        .content-view { display: none; }
+        .content-view.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .supported-obfuscators { margin-top: 5rem; }
-        .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; max-width: 400px; margin: 0 auto; }
-        .status-card {
-            background-color: var(--bg-light); border: 1px solid var(--border-color); border-radius: var(--radius-md);
-            padding: 1.5rem; display: flex; align-items: center; gap: 1rem;
+        .dumper-container { display: flex; gap: 2rem; height: calc(100vh - 250px); min-height: 500px; }
+        .panel { display: flex; flex-direction: column; flex: 1; background-color: var(--bg-light); padding: 1.5rem; border-radius: var(--radius-lg); position: relative; }
+        .panel::before {
+            content: ''; position: absolute; inset: 0; z-index: -1;
+            border-radius: inherit; padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
         }
+
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .panel-header label { font-size: 1rem; font-weight: 500; color: var(--text-secondary); margin: 0; }
+        .panel-actions { display: flex; gap: 0.75rem; }
+        .editor-container { flex-grow: 1; border-radius: var(--radius-md); overflow: hidden; }
+        .plain-editor { width: 100%; height: 100%; flex-grow: 1; box-sizing: border-box; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-secondary); padding: 15px; font-family: Consolas, 'Courier New', monospace; font-size: 0.9rem; line-height: 1.6; resize: none; }
+        .plain-editor.output { white-space: pre-wrap; word-wrap: break-word; overflow-y: auto; }
+        .btn { padding: 14px 32px; font-size: 1rem; font-weight: 600; border-radius: 9999px; text-decoration: none; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); margin-top: 1.5rem; }
+        .btn-primary { background-color: var(--primary); color: #fff; box-shadow: 0 0 20px rgba(168, 85, 247, 0.3); }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); background-color: var(--primary-light); box-shadow: 0 8px 30px rgba(168, 85, 247, 0.4); }
+        .btn:disabled { background-color: rgba(255,255,255,0.05); color: var(--text-secondary); cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-icon { background-color: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 8px 12px; font-size: 0.8rem; font-weight: 500; border-radius: var(--radius-md); margin-top: 0; cursor: pointer; }
+        .btn-icon:hover:not(:disabled) { background-color: rgba(255, 255, 255, 0.1); color: var(--text-primary); }
+        .btn-icon:disabled { opacity: 0.5; }
+        .timing-info { font-size: 0.8rem; color: var(--text-secondary); margin-left: auto; margin-right: 1rem; }
+        .fa-spinner { animation: fa-spin 1s linear infinite; } @keyframes fa-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; max-width: 800px; }
+        .status-card { background-color: var(--bg-light); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; display: flex; align-items: center; gap: 1rem; }
         .status-card .status-indicator { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
         .status-indicator.online { background-color: #22c55e; box-shadow: 0 0 8px #22c55e; }
         .status-card h3 { font-size: 1rem; font-weight: 500; color: var(--text-primary); }
         .status-card p { font-size: 0.9rem; font-weight: 400; color: var(--text-secondary); margin: 0; }
-
-        footer { padding: 4rem 0; border-top: 1px solid var(--border-color); margin-top: 40px; text-align: center; }
-        .footer-content { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+        .overlay { display: none; }
         
         @media(max-width: 992px) {
-            .dumper-container {
-                flex-direction: column;
-                height: auto;
+            .sidebar { position: fixed; height: 100%; top: 0; left: 0; transform: translateX(-100%); background-color: #0c0c14; }
+            .sidebar.open { transform: translateX(0); }
+            .app-header {
+                position: fixed; top: 0; left: 0; right: 0;
+                max-width: 100%; margin: 0; border-radius: 0;
+                padding: 0 1.5rem; height: 70px;
             }
-            .panel {
-                min-height: 400px;
-            }
-            .nav-links { display: none; }
+            .mobile-menu-btn { display: block; }
+            .content-wrapper { padding-top: 70px; }
+            .main-content { padding: 1.5rem; }
+            .app-header { top: 0; margin-bottom: 0; }
+            .dumper-container { flex-direction: column; height: auto; }
+            .panel { min-height: 400px; }
+            .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1099; display: none; }
+            .overlay.open { display: block; }
         }
     </style>
 </head>
 <body>
-    <div class="background-glow"></div>
-
-    <header>
-        <div class="container navbar">
-            <a href="index.html" class="nav-brand"><i class="fa-solid fa-gem"></i> Cerium</a>
-            <nav class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="#">Dumper</a>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <a href="index.html" class="sidebar-header">
+                <i class="fa-solid fa-gem"></i> Cerium
+            </a>
+            <nav class="sidebar-nav">
+                <a href="#" class="sidebar-link active" data-view="dumper"><i class="fa-solid fa-code"></i> Dumper</a>
+                <a href="#" class="sidebar-link" data-view="status"><i class="fa-solid fa-server"></i> Status</a>
             </nav>
-        </div>
-    </header>
+            <div class="sidebar-footer">
+                <a href="index.html" class="sidebar-link" style="border-radius: var(--radius-md);"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+            </div>
+        </aside>
 
-    <main>
-        <section class="dumper-section">
-            <div class="container">
-                <div class="section-header">
-                    <h1>Cerium Lua Dumper</h1>
-                </div>
-                <div class="dumper-container">
-                    <div class="panel">
-                        <div class="panel-header">
-                            <label for="input-editor-container">Obfuscated Code:</label>
-                            <div class="panel-actions">
-                                <label for="file-upload" class="btn btn-icon">
-                                    <i class="fa-solid fa-upload"></i> Upload File
-                                </label>
-                                <input type="file" id="file-upload" accept=".lua,.txt" style="display: none;">
+        <div class="content-wrapper">
+            <header class="app-header">
+                <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
+                <h2 class="view-title" id="view-title">Lua Dumper</h2>
+            </header>
+            
+            <main class="main-content">
+                <div id="view-dumper" class="content-view active">
+                    <div class="dumper-container">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <label for="input-editor-container">Obfuscated Code</label>
+                                <div class="panel-actions">
+                                    <label for="file-upload" class="btn btn-icon"><i class="fa-solid fa-upload"></i> Upload</label>
+                                    <input type="file" id="file-upload" accept=".lua,.txt" style="display: none;">
+                                </div>
                             </div>
+                            <div id="input-editor-container" class="editor-container"></div>
+                            <textarea id="input-textarea" class="plain-editor" style="display: none;"></textarea>
+                            <button id="dump-button" class="btn btn-primary">Deobfuscate</button>
                         </div>
-                        <div id="input-editor-container" class="editor-container"></div>
-                        <textarea id="input-textarea" class="plain-editor" style="display: none;"></textarea>
-                        <button id="dump-button" class="btn btn-primary">Deobfuscate</button>
-                    </div>
-                    <div class="panel">
-                        <div class="panel-header">
-                            <label for="output-editor-container">Result:</label>
-                            <span id="timing-info" class="timing-info"></span>
-                            <div class="panel-actions">
-                                <button id="copy-button" class="btn btn-icon" disabled><i class="fa-solid fa-copy"></i> Copy</button>
-                                <button id="download-button" class="btn btn-icon" disabled><i class="fa-solid fa-download"></i> Download</button>
+                        <div class="panel">
+                            <div class="panel-header">
+                                <label for="output-editor-container">Result</label>
+                                <span id="timing-info" class="timing-info"></span>
+                                <div class="panel-actions">
+                                    <button id="copy-button" class="btn btn-icon" disabled><i class="fa-solid fa-copy"></i> Copy</button>
+                                    <button id="download-button" class="btn btn-icon" disabled><i class="fa-solid fa-download"></i> Download</button>
+                                </div>
                             </div>
+                            <div id="output-editor-container" class="editor-container"></div>
+                            <pre id="output-pre" class="plain-editor output" style="display: none;"></pre>
                         </div>
-                        <div id="output-editor-container" class="editor-container"></div>
-                        <pre id="output-pre" class="plain-editor output" style="display: none;"></pre>
                     </div>
                 </div>
 
-                <div class="supported-obfuscators">
-                    <div class="section-header">
-                        <h2>Currently Supported</h2>
-                        <p>Our dumper is continuously updated. Here is the current status of supported obfuscators.</p>
-                    </div>
+                <div id="view-status" class="content-view">
+                    <h1 style="font-size: 2rem; margin-bottom: 1rem;">Supported Obfuscators</h1>
+                    <p style="color: var(--text-secondary); max-width: 600px; margin-bottom: 2rem;">Our dumper is continuously updated. Here is the current status of supported obfuscators.</p>
                     <div class="status-grid">
                         <div class="status-card">
                             <div class="status-indicator online"></div>
@@ -226,152 +217,129 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container footer-content">
-            <div class="nav-brand"><i class="fa-solid fa-gem"></i> Cerium</div>
-            <p>&copy; 2024 Cerium. All Rights Reserved.</p>
+            </main>
         </div>
-    </footer>
+        <div class="overlay" id="overlay"></div>
+    </div>
 
     <script>
-        const dumpButton = document.getElementById('dump-button');
-        const copyButton = document.getElementById('copy-button');
-        const downloadButton = document.getElementById('download-button');
-        const fileUpload = document.getElementById('file-upload');
-        const timingInfo = document.getElementById('timing-info');
-        const DUMPER_API_URL = 'https://absent-modification-concentrations-seat.trycloudflare.com/dump';
+        document.addEventListener('DOMContentLoaded', () => {
+            const dumpButton = document.getElementById('dump-button');
+            const copyButton = document.getElementById('copy-button');
+            const downloadButton = document.getElementById('download-button');
+            const fileUpload = document.getElementById('file-upload');
+            const timingInfo = document.getElementById('timing-info');
+            const DUMPER_API_URL = 'https://absent-modification-concentrations-seat.trycloudflare.com/dump';
+            const isMobile = window.innerWidth <= 992;
+            const inputMonacoContainer = document.getElementById('input-editor-container');
+            const outputMonacoContainer = document.getElementById('output-editor-container');
+            const inputTextArea = document.getElementById('input-textarea');
+            const outputPre = document.getElementById('output-pre');
+            let getCode, setInputCode, getOutputCode, setOutputCode;
+            const placeholderInput = '-- Paste your obfuscated script here or upload a file...';
+            const placeholderOutput = '-- Your result will appear here...';
 
-        const isMobile = window.innerWidth <= 768;
-
-        const inputMonacoContainer = document.getElementById('input-editor-container');
-        const outputMonacoContainer = document.getElementById('output-editor-container');
-        const inputTextArea = document.getElementById('input-textarea');
-        const outputPre = document.getElementById('output-pre');
-
-        let getCode, setCode, getOutputCode;
-        let inputEditor, outputEditor;
-        
-        const placeholderInput = '-- Paste your obfuscated script here or upload a file...';
-        const placeholderOutput = '-- Your result will appear here...';
-
-        if (isMobile) {
-            inputMonacoContainer.style.display = 'none';
-            outputMonacoContainer.style.display = 'none';
-            inputTextArea.style.display = 'block';
-            outputPre.style.display = 'block';
+            if (isMobile) {
+                inputMonacoContainer.style.display = 'none'; outputMonacoContainer.style.display = 'none';
+                inputTextArea.style.display = 'block'; outputPre.style.display = 'block';
+                inputTextArea.value = placeholderInput; outputPre.textContent = placeholderOutput;
+                getCode = () => inputTextArea.value; setInputCode = (text) => inputTextArea.value = text;
+                getOutputCode = () => outputPre.textContent; setOutputCode = (text) => outputPre.textContent = text;
+            } else {
+                inputTextArea.style.display = 'none'; outputPre.style.display = 'none';
+                require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }});
+                require(['vs/editor/editor.main'], function() {
+                    const inputEditor = monaco.editor.create(inputMonacoContainer, { value: placeholderInput, language: 'lua', theme: 'vs-dark', automaticLayout: true, minimap: { enabled: true }, scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }, 'roundedSelection': false, 'scrollBeyondLastLine': false });
+                    const outputEditor = monaco.editor.create(outputMonacoContainer, { value: placeholderOutput, language: 'lua', theme: 'vs-dark', automaticLayout: true, readOnly: true, minimap: { enabled: false }, scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }, 'roundedSelection': false, 'scrollBeyondLastLine': false });
+                    getCode = () => inputEditor.getValue(); setInputCode = (text) => inputEditor.setValue(text);
+                    getOutputCode = () => outputEditor.getValue(); setOutputCode = (text) => outputEditor.setValue(text);
+                });
+            }
             
-            inputTextArea.value = placeholderInput;
-            outputPre.textContent = placeholderOutput;
-
-            getCode = () => inputTextArea.value;
-            setCode = (text) => inputTextArea.value = text;
-            getOutputCode = () => outputPre.textContent;
-
-        } else {
-            inputTextArea.style.display = 'none';
-            outputPre.style.display = 'none';
-
-            require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }});
-            require(['vs/editor/editor.main'], function() {
-                inputEditor = monaco.editor.create(inputMonacoContainer, {
-                    value: placeholderInput, language: 'lua', theme: 'vs-dark',
-                    automaticLayout: true, minimap: { enabled: true },
-                    scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
-                });
-                outputEditor = monaco.editor.create(outputMonacoContainer, {
-                    value: placeholderOutput, language: 'lua', theme: 'vs-dark',
-                    automaticLayout: true, readOnly: true, minimap: { enabled: false },
-                    scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
-                });
-
-                getCode = () => inputEditor.getValue();
-                setCode = (text) => inputEditor.setValue(text);
-                getOutputCode = () => outputEditor.getValue();
-            });
-        }
-        
-        dumpButton.addEventListener('click', async () => {
-            if (!getCode) return;
-            const code = getCode();
-            if (!code || code === placeholderInput) return;
-
-            dumpButton.disabled = true;
-            copyButton.disabled = true;
-            downloadButton.disabled = true;
-            timingInfo.textContent = '';
-            dumpButton.innerHTML = '<i class="fa-solid fa-spinner"></i> Deobfuscating...';
-            (isMobile ? outputPre : outputEditor).setValue('-- Working its magic, please wait...');
-            
-            const startTime = performance.now();
-
-            try {
-                const response = await fetch(DUMPER_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: code })
-                });
-
-                const endTime = performance.now();
-                const duration = ((endTime - startTime) / 1000).toFixed(2);
-                
-                const data = await response.json();
-                const resultText = response.ok ? (data.result || '-- Empty or invalid result.') : `-- Error: ${data.error}`;
-                (isMobile ? outputPre : outputEditor).setValue(resultText);
-
-                if(response.ok) {
-                    timingInfo.textContent = `Completed in ${duration}s`;
-                    if(data.result) {
-                        copyButton.disabled = false;
-                        downloadButton.disabled = false;
+            dumpButton.addEventListener('click', async () => {
+                if (!getCode) return;
+                const code = getCode();
+                if (!code || code === placeholderInput) return;
+                dumpButton.disabled = true; copyButton.disabled = true; downloadButton.disabled = true;
+                timingInfo.textContent = ''; dumpButton.innerHTML = '<i class="fa-solid fa-spinner"></i> Deobfuscating...';
+                setOutputCode('-- Working its magic, please wait...');
+                const startTime = performance.now();
+                try {
+                    const response = await fetch(DUMPER_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: code }) });
+                    const endTime = performance.now();
+                    const duration = ((endTime - startTime) / 1000).toFixed(2);
+                    const data = await response.json();
+                    const resultText = response.ok ? (data.result || '-- Empty or invalid result.') : `-- Error: ${data.error}`;
+                    setOutputCode(resultText);
+                    if(response.ok) {
+                        timingInfo.textContent = `Completed in ${duration}s`;
+                        if(data.result) { copyButton.disabled = false; downloadButton.disabled = false; }
                     }
+                } catch (err) {
+                    setOutputCode('-- Error: Could not connect to the dumper server.\n-- The service might be offline or blocked by your network.');
+                } finally {
+                    dumpButton.disabled = false; dumpButton.innerHTML = 'Deobfuscate';
                 }
-
-            } catch (err) {
-                (isMobile ? outputPre : outputEditor).setValue('-- Error: Could not connect to the dumper server.\n-- The service might be offline or blocked by your network.');
-            } finally {
-                dumpButton.disabled = false;
-                dumpButton.innerHTML = 'Deobfuscate';
-            }
-        });
-
-        copyButton.addEventListener('click', () => {
-            if (!getOutputCode) return;
-            navigator.clipboard.writeText(getOutputCode()).then(() => {
-                const originalText = copyButton.innerHTML;
-                copyButton.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
-                setTimeout(() => { copyButton.innerHTML = originalText; }, 2000);
             });
-        });
 
-        downloadButton.addEventListener('click', () => {
-            if (!getOutputCode) return;
-            const code = getOutputCode();
-            const blob = new Blob([code], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'deobfuscated_script.lua';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
+            copyButton.addEventListener('click', () => {
+                if (!getOutputCode) return;
+                navigator.clipboard.writeText(getOutputCode()).then(() => {
+                    const originalHTML = copyButton.innerHTML;
+                    copyButton.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
+                    setTimeout(() => { copyButton.innerHTML = originalHTML; }, 2000);
+                });
+            });
 
-        fileUpload.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    if (setCode) {
-                        setCode(e.target.result);
+            downloadButton.addEventListener('click', () => {
+                if (!getOutputCode) return;
+                const code = getOutputCode();
+                const blob = new Blob([code], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'deobfuscated_script.lua';
+                document.body.appendChild(a); a.click();
+                document.body.removeChild(a); URL.revokeObjectURL(url);
+            });
+
+            fileUpload.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => { if (setInputCode) { setInputCode(e.target.result); } };
+                    reader.readAsText(file);
+                }
+                event.target.value = '';
+            });
+            
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const contentViews = document.querySelectorAll('.content-view');
+            const viewTitle = document.getElementById('view-title');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (link.getAttribute('href') === 'index.html') { window.location.href = 'index.html'; return; }
+                    const view = e.currentTarget.dataset.view;
+                    contentViews.forEach(v => v.classList.remove('active'));
+                    document.getElementById(`view-${view}`).classList.add('active');
+                    sidebarLinks.forEach(l => l.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    if(viewTitle) {
+                        const iconHTML = e.currentTarget.querySelector('i').outerHTML;
+                        viewTitle.innerHTML = `${iconHTML} ${e.currentTarget.textContent.trim()}`;
                     }
-                };
-                reader.readAsText(file);
-            }
+                    if(isMobile) closeMobileMenu();
+                });
+            });
+
+            const openMobileMenu = () => { sidebar.classList.add('open'); overlay.classList.add('open'); };
+            const closeMobileMenu = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); };
+            if(mobileMenuBtn) mobileMenuBtn.addEventListener('click', openMobileMenu);
+            if(overlay) overlay.addEventListener('click', closeMobileMenu);
         });
     </script>
 </body>
