@@ -124,9 +124,18 @@
             background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary);
             padding: 8px 12px; font-size: 0.8rem; font-weight: 500;
             border-radius: var(--radius-md); margin-top: 0;
+            cursor: pointer;
         }
         .btn-icon:hover:not(:disabled) { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
         .btn-icon:disabled { opacity: 0.5; }
+        .timing-info {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-left: auto;
+            margin-right: 1rem;
+        }
+        .fa-spinner { animation: fa-spin 1s linear infinite; }
+        @keyframes fa-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .supported-obfuscators { margin-top: 5rem; }
         .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; max-width: 400px; margin: 0 auto; }
@@ -177,6 +186,12 @@
                     <div class="panel">
                         <div class="panel-header">
                             <label for="input-editor-container">Obfuscated Code:</label>
+                            <div class="panel-actions">
+                                <label for="file-upload" class="btn btn-icon">
+                                    <i class="fa-solid fa-upload"></i> Upload File
+                                </label>
+                                <input type="file" id="file-upload" accept=".lua,.txt" style="display: none;">
+                            </div>
                         </div>
                         <div id="input-editor-container" class="editor-container"></div>
                         <textarea id="input-textarea" class="plain-editor" style="display: none;"></textarea>
@@ -185,6 +200,7 @@
                     <div class="panel">
                         <div class="panel-header">
                             <label for="output-editor-container">Result:</label>
+                            <span id="timing-info" class="timing-info"></span>
                             <div class="panel-actions">
                                 <button id="copy-button" class="btn btn-icon" disabled><i class="fa-solid fa-copy"></i> Copy</button>
                                 <button id="download-button" class="btn btn-icon" disabled><i class="fa-solid fa-download"></i> Download</button>
@@ -225,6 +241,8 @@
         const dumpButton = document.getElementById('dump-button');
         const copyButton = document.getElementById('copy-button');
         const downloadButton = document.getElementById('download-button');
+        const fileUpload = document.getElementById('file-upload');
+        const timingInfo = document.getElementById('timing-info');
         const DUMPER_API_URL = 'https://absent-modification-concentrations-seat.trycloudflare.com/dump';
 
         const isMobile = window.innerWidth <= 768;
@@ -237,7 +255,7 @@
         let getCode, setCode, getOutputCode;
         let inputEditor, outputEditor;
         
-        const placeholderInput = '-- Paste your obfuscated script here...';
+        const placeholderInput = '-- Paste your obfuscated script here or upload a file...';
         const placeholderOutput = '-- Your result will appear here...';
 
         if (isMobile) {
@@ -250,7 +268,7 @@
             outputPre.textContent = placeholderOutput;
 
             getCode = () => inputTextArea.value;
-            setCode = (text) => outputPre.textContent = text;
+            setCode = (text) => inputTextArea.value = text;
             getOutputCode = () => outputPre.textContent;
 
         } else {
@@ -260,26 +278,18 @@
             require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }});
             require(['vs/editor/editor.main'], function() {
                 inputEditor = monaco.editor.create(inputMonacoContainer, {
-                    value: placeholderInput,
-                    language: 'lua',
-                    theme: 'vs-dark',
-                    automaticLayout: true,
-                    minimap: { enabled: true },
+                    value: placeholderInput, language: 'lua', theme: 'vs-dark',
+                    automaticLayout: true, minimap: { enabled: true },
                     scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
                 });
-
                 outputEditor = monaco.editor.create(outputMonacoContainer, {
-                    value: placeholderOutput,
-                    language: 'lua',
-                    theme: 'vs-dark',
-                    automaticLayout: true,
-                    readOnly: true,
-                    minimap: { enabled: false },
+                    value: placeholderOutput, language: 'lua', theme: 'vs-dark',
+                    automaticLayout: true, readOnly: true, minimap: { enabled: false },
                     scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
                 });
 
                 getCode = () => inputEditor.getValue();
-                setCode = (text) => outputEditor.setValue(text);
+                setCode = (text) => inputEditor.setValue(text);
                 getOutputCode = () => outputEditor.getValue();
             });
         }
@@ -292,8 +302,11 @@
             dumpButton.disabled = true;
             copyButton.disabled = true;
             downloadButton.disabled = true;
-            dumpButton.textContent = 'Deobfuscating...';
-            setCode('-- Working its magic, please wait...');
+            timingInfo.textContent = '';
+            dumpButton.innerHTML = '<i class="fa-solid fa-spinner"></i> Deobfuscating...';
+            (isMobile ? outputPre : outputEditor).setValue('-- Working its magic, please wait...');
+            
+            const startTime = performance.now();
 
             try {
                 const response = await fetch(DUMPER_API_URL, {
@@ -302,20 +315,26 @@
                     body: JSON.stringify({ code: code })
                 });
 
+                const endTime = performance.now();
+                const duration = ((endTime - startTime) / 1000).toFixed(2);
+                
                 const data = await response.json();
                 const resultText = response.ok ? (data.result || '-- Empty or invalid result.') : `-- Error: ${data.error}`;
-                setCode(resultText);
+                (isMobile ? outputPre : outputEditor).setValue(resultText);
 
-                if(response.ok && data.result) {
-                    copyButton.disabled = false;
-                    downloadButton.disabled = false;
+                if(response.ok) {
+                    timingInfo.textContent = `Completed in ${duration}s`;
+                    if(data.result) {
+                        copyButton.disabled = false;
+                        downloadButton.disabled = false;
+                    }
                 }
 
             } catch (err) {
-                setCode('-- Error: Could not connect to the dumper server.\n-- The service might be offline or blocked by your network.');
+                (isMobile ? outputPre : outputEditor).setValue('-- Error: Could not connect to the dumper server.\n-- The service might be offline or blocked by your network.');
             } finally {
                 dumpButton.disabled = false;
-                dumpButton.textContent = 'Deobfuscate';
+                dumpButton.innerHTML = 'Deobfuscate';
             }
         });
 
@@ -324,9 +343,7 @@
             navigator.clipboard.writeText(getOutputCode()).then(() => {
                 const originalText = copyButton.innerHTML;
                 copyButton.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
-                setTimeout(() => {
-                    copyButton.innerHTML = originalText;
-                }, 2000);
+                setTimeout(() => { copyButton.innerHTML = originalText; }, 2000);
             });
         });
 
@@ -342,6 +359,19 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        });
+
+        fileUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    if (setCode) {
+                        setCode(e.target.result);
+                    }
+                };
+                reader.readAsText(file);
+            }
         });
     </script>
 </body>
