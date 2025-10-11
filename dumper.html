@@ -98,6 +98,15 @@
             overflow: hidden;
             border: 1px solid var(--border-color);
         }
+        .plain-editor {
+            width: 100%; height: 100%; flex-grow: 1;
+            box-sizing: border-box; background-color: var(--bg-dark);
+            border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            color: var(--text-secondary); padding: 15px;
+            font-family: Consolas, 'Courier New', monospace; font-size: 0.9rem;
+            line-height: 1.6; resize: none;
+        }
+        .plain-editor.output { white-space: pre-wrap; word-wrap: break-word; overflow-y: auto; }
         .btn {
             padding: 14px 32px; font-size: 1rem; font-weight: 600; border-radius: 9999px;
             text-decoration: none; border: 1px solid transparent; display: inline-flex;
@@ -141,6 +150,7 @@
             .panel {
                 min-height: 400px;
             }
+            .nav-links { display: none; }
         }
     </style>
 </head>
@@ -166,24 +176,22 @@
                 <div class="dumper-container">
                     <div class="panel">
                         <div class="panel-header">
-                            <label for="input-editor">Obfuscated Code:</label>
+                            <label for="input-editor-container">Obfuscated Code:</label>
                         </div>
-                        <div class="editor-container">
-                            <div id="input-editor" style="width:100%;height:100%;"></div>
-                        </div>
+                        <div id="input-editor-container" class="editor-container"></div>
+                        <textarea id="input-textarea" class="plain-editor" style="display: none;"></textarea>
                         <button id="dump-button" class="btn btn-primary">Deobfuscate</button>
                     </div>
                     <div class="panel">
                         <div class="panel-header">
-                            <label for="output-editor">Result:</label>
+                            <label for="output-editor-container">Result:</label>
                             <div class="panel-actions">
                                 <button id="copy-button" class="btn btn-icon" disabled><i class="fa-solid fa-copy"></i> Copy</button>
                                 <button id="download-button" class="btn btn-icon" disabled><i class="fa-solid fa-download"></i> Download</button>
                             </div>
                         </div>
-                        <div class="editor-container">
-                             <div id="output-editor" style="width:100%;height:100%;"></div>
-                        </div>
+                        <div id="output-editor-container" class="editor-container"></div>
+                        <pre id="output-pre" class="plain-editor output" style="display: none;"></pre>
                     </div>
                 </div>
 
@@ -219,40 +227,73 @@
         const downloadButton = document.getElementById('download-button');
         const DUMPER_API_URL = 'https://absent-modification-concentrations-seat.trycloudflare.com/dump';
 
+        const isMobile = window.innerWidth <= 768;
+
+        const inputMonacoContainer = document.getElementById('input-editor-container');
+        const outputMonacoContainer = document.getElementById('output-editor-container');
+        const inputTextArea = document.getElementById('input-textarea');
+        const outputPre = document.getElementById('output-pre');
+
+        let getCode, setCode, getOutputCode;
         let inputEditor, outputEditor;
+        
+        const placeholderInput = '-- Paste your obfuscated script here...';
+        const placeholderOutput = '-- Your result will appear here...';
 
-        require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }});
-        require(['vs/editor/editor.main'], function() {
-            inputEditor = monaco.editor.create(document.getElementById('input-editor'), {
-                value: '-- Paste your obfuscated script here...',
-                language: 'lua',
-                theme: 'vs-dark',
-                automaticLayout: true,
-                minimap: { enabled: true },
-                scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+        if (isMobile) {
+            inputMonacoContainer.style.display = 'none';
+            outputMonacoContainer.style.display = 'none';
+            inputTextArea.style.display = 'block';
+            outputPre.style.display = 'block';
+            
+            inputTextArea.value = placeholderInput;
+            outputPre.textContent = placeholderOutput;
+
+            getCode = () => inputTextArea.value;
+            setCode = (text) => outputPre.textContent = text;
+            getOutputCode = () => outputPre.textContent;
+
+        } else {
+            inputTextArea.style.display = 'none';
+            outputPre.style.display = 'none';
+
+            require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }});
+            require(['vs/editor/editor.main'], function() {
+                inputEditor = monaco.editor.create(inputMonacoContainer, {
+                    value: placeholderInput,
+                    language: 'lua',
+                    theme: 'vs-dark',
+                    automaticLayout: true,
+                    minimap: { enabled: true },
+                    scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+                });
+
+                outputEditor = monaco.editor.create(outputMonacoContainer, {
+                    value: placeholderOutput,
+                    language: 'lua',
+                    theme: 'vs-dark',
+                    automaticLayout: true,
+                    readOnly: true,
+                    minimap: { enabled: false },
+                    scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+                });
+
+                getCode = () => inputEditor.getValue();
+                setCode = (text) => outputEditor.setValue(text);
+                getOutputCode = () => outputEditor.getValue();
             });
-
-            outputEditor = monaco.editor.create(document.getElementById('output-editor'), {
-                value: '-- Your result will appear here...',
-                language: 'lua',
-                theme: 'vs-dark',
-                automaticLayout: true,
-                readOnly: true,
-                minimap: { enabled: false },
-                scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
-            });
-        });
-
+        }
+        
         dumpButton.addEventListener('click', async () => {
-            if (!inputEditor) return;
-            const code = inputEditor.getValue();
-            if (!code) return;
+            if (!getCode) return;
+            const code = getCode();
+            if (!code || code === placeholderInput) return;
 
             dumpButton.disabled = true;
             copyButton.disabled = true;
             downloadButton.disabled = true;
             dumpButton.textContent = 'Deobfuscating...';
-            outputEditor.setValue('-- Working its magic, please wait...');
+            setCode('-- Working its magic, please wait...');
 
             try {
                 const response = await fetch(DUMPER_API_URL, {
@@ -263,7 +304,7 @@
 
                 const data = await response.json();
                 const resultText = response.ok ? (data.result || '-- Empty or invalid result.') : `-- Error: ${data.error}`;
-                outputEditor.setValue(resultText);
+                setCode(resultText);
 
                 if(response.ok && data.result) {
                     copyButton.disabled = false;
@@ -271,7 +312,7 @@
                 }
 
             } catch (err) {
-                outputEditor.setValue('-- Error: Could not connect to the dumper server.\n-- The service might be offline or blocked by your network.');
+                setCode('-- Error: Could not connect to the dumper server.\n-- The service might be offline or blocked by your network.');
             } finally {
                 dumpButton.disabled = false;
                 dumpButton.textContent = 'Deobfuscate';
@@ -279,8 +320,8 @@
         });
 
         copyButton.addEventListener('click', () => {
-            if (!outputEditor) return;
-            navigator.clipboard.writeText(outputEditor.getValue()).then(() => {
+            if (!getOutputCode) return;
+            navigator.clipboard.writeText(getOutputCode()).then(() => {
                 const originalText = copyButton.innerHTML;
                 copyButton.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
                 setTimeout(() => {
@@ -290,8 +331,8 @@
         });
 
         downloadButton.addEventListener('click', () => {
-            if (!outputEditor) return;
-            const code = outputEditor.getValue();
+            if (!getOutputCode) return;
+            const code = getOutputCode();
             const blob = new Blob([code], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
