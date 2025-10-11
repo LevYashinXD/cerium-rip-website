@@ -4,41 +4,205 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cerium Hub - Lua Dumper</title>
+    
+    <meta name="description" content="A powerful, free Lua deobfuscator and dumper from Cerium Hub. Paste your obfuscated script to get a clean, readable result.">
+    <meta property="og:title" content="Cerium Hub - Lua Dumper">
+    <meta property="og:description" content="A powerful, free Lua deobfuscator and dumper from Cerium Hub.">
+    <meta property="og:image" content="https://cdn.discordapp.com/attachments/1415510139867238434/1425264262862868520/cab94df1-e5b7-4a17-9665-11eeb84d1831.png">
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💎</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+
     <style>
-        body { font-family: Consolas, monospace; background-color: #1e1e1e; color: #d4d4d4; }
-        .container { max-width: 1200px; margin: 2rem auto; display: flex; gap: 20px; height: 80vh; }
-        .panel { display: flex; flex-direction: column; flex: 1; }
-        textarea, pre { width: 100%; height: 100%; box-sizing: border-box; background-color: #252526; border: 1px solid #333; color: #d4d4d4; padding: 10px; font-size: 14px; }
-        button { background-color: #0e639c; color: white; border: none; padding: 15px; font-size: 18px; cursor: pointer; margin-top: 10px; }
-        button:disabled { background-color: #333; }
+        :root {
+            --primary: #a855f7;
+            --primary-light: #c084fc;
+            --bg-dark: #0A0A10;
+            --bg-light: #101018;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #F5F5F7;
+            --text-secondary: #A1A1A9;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        .background-glow {
+            position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+            width: 1000px; height: 800px; background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.15), transparent 70%);
+            filter: blur(120px); z-index: -1; pointer-events: none;
+        }
+        .container { width: 90%; max-width: 1400px; margin: 0 auto; }
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background-color: rgba(10, 10, 16, 0.7); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
+        .nav-brand {
+            font-size: 1.5rem; font-weight: 700; color: var(--text-primary);
+            text-decoration: none; display: flex; align-items: center; gap: 10px;
+        }
+        .nav-brand i { color: var(--primary); }
+        .nav-links { display: flex; gap: 1rem; list-style: none; }
+        .nav-links a {
+            color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9rem;
+            padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease;
+        }
+        .nav-links a:hover { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+        .dumper-section { padding-top: 140px; padding-bottom: 80px; }
+        .section-header { text-align: center; max-width: 700px; margin: 0 auto 3rem; }
+        .section-header h1 {
+            font-size: clamp(2.5rem, 5vw, 3.25rem); font-weight: 700;
+            letter-spacing: -0.03em; margin-bottom: 1rem;
+        }
+        .dumper-container {
+            display: flex; gap: 2rem;
+            height: calc(100vh - 280px); min-height: 500px;
+        }
+        .panel {
+            display: flex; flex-direction: column; flex: 1;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+        .panel label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        .editor-container {
+            flex-grow: 1;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .btn {
+            padding: 14px 32px; font-size: 1rem; font-weight: 600; border-radius: 9999px;
+            text-decoration: none; border: 1px solid transparent; display: inline-flex;
+            align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            margin-top: 1.5rem;
+        }
+        .btn-primary { background-color: var(--primary); color: #fff; box-shadow: 0 0 20px rgba(168, 85, 247, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); background-color: var(--primary-light); box-shadow: 0 8px 30px rgba(168, 85, 247, 0.4); }
+        .btn:disabled {
+            background-color: var(--bg-light); color: var(--text-secondary);
+            cursor: not-allowed; transform: none; box-shadow: none;
+        }
+        footer { padding: 4rem 0; border-top: 1px solid var(--border-color); margin-top: 40px; text-align: center; }
+        .footer-content { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+        
+        @media(max-width: 992px) {
+            .dumper-container {
+                flex-direction: column;
+                height: auto;
+            }
+            .panel {
+                min-height: 400px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1 style="text-align: center;">Cerium Lua Dumper</h1>
-    <div class="container">
-        <div class="panel">
-            <label for="input-code">Obfuscated Code:</label>
-            <textarea id="input-code" placeholder="Paste your obfuscated script here..."></textarea>
-            <button id="dump-button">Deobfuscate</button>
-        </div>
-        <div class="panel">
-            <label for="output-code">Result:</label>
-            <pre id="output-code" style="white-space: pre-wrap;">Your result will appear here...</pre>
-        </div>
-    </div>
+    <div class="background-glow"></div>
 
- <script>
+    <header>
+        <div class="container navbar">
+            <a href="index.html" class="nav-brand"><i class="fa-solid fa-gem"></i> Cerium</a>
+            <nav class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="#">Dumper</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="dumper-section">
+            <div class="container">
+                <div class="section-header">
+                    <h1>Cerium Lua Dumper</h1>
+                </div>
+                <div class="dumper-container">
+                    <div class="panel">
+                        <label for="input-editor">Obfuscated Code:</label>
+                        <div class="editor-container">
+                            <div id="input-editor" style="width:100%;height:100%;"></div>
+                        </div>
+                        <button id="dump-button" class="btn btn-primary">Deobfuscate</button>
+                    </div>
+                    <div class="panel">
+                        <label for="output-editor">Result:</label>
+                        <div class="editor-container">
+                             <div id="output-editor" style="width:100%;height:100%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="nav-brand"><i class="fa-solid fa-gem"></i> Cerium</div>
+            <p>&copy; 2024 Cerium. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
         const dumpButton = document.getElementById('dump-button');
-        const inputCode = document.getElementById('input-code');
-        const outputCode = document.getElementById('output-code');
+        const inputEditorContainer = document.getElementById('input-editor');
+        const outputEditorContainer = document.getElementById('output-editor');
         const DUMPER_API_URL = 'https://absent-modification-concentrations-seat.trycloudflare.com/dump';
 
+        let inputEditor, outputEditor;
+
+        require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            inputEditor = monaco.editor.create(inputEditorContainer, {
+                value: '-- Paste your obfuscated script here...',
+                language: 'lua',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: true },
+                scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+            });
+
+            outputEditor = monaco.editor.create(outputEditorContainer, {
+                value: '-- Your result will appear here...',
+                language: 'lua',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                readOnly: true,
+                minimap: { enabled: false },
+                scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+            });
+        });
+
         dumpButton.addEventListener('click', async () => {
-            const code = inputCode.value;
+            const code = inputEditor.getValue();
             if (!code) return;
 
             dumpButton.disabled = true;
-            outputCode.textContent = 'Deobfuscating, please wait...';
+            dumpButton.textContent = 'Deobfuscating...';
+            outputEditor.setValue('-- Working its magic, please wait...');
 
             try {
                 const response = await fetch(DUMPER_API_URL, {
@@ -48,12 +212,14 @@
                 });
 
                 const data = await response.json();
-                outputCode.textContent = response.ok ? (data.result || 'Empty result.') : `Error: ${data.error}`;
+                const resultText = response.ok ? (data.result || '-- Empty or invalid result.') : `-- Error: ${data.error}`;
+                outputEditor.setValue(resultText);
 
             } catch (err) {
-                outputCode.textContent = 'Error: Could not connect to the dumper server. Is it running?';
+                outputEditor.setValue('-- Error: Could not connect to the dumper server.\n-- The service might be offline or blocked by your network.');
             } finally {
                 dumpButton.disabled = false;
+                dumpButton.textContent = 'Deobfuscate';
             }
         });
     </script>
