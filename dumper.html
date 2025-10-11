@@ -67,13 +67,14 @@
         .nav-links a:hover { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
         .dumper-section { padding-top: 140px; padding-bottom: 80px; }
         .section-header { text-align: center; max-width: 700px; margin: 0 auto 3rem; }
-        .section-header h1 {
+        .section-header h1, .section-header h2 {
             font-size: clamp(2.5rem, 5vw, 3.25rem); font-weight: 700;
             letter-spacing: -0.03em; margin-bottom: 1rem;
         }
+        .section-header p { font-size: 1.1rem; color: var(--text-secondary); line-height: 1.6; }
         .dumper-container {
             display: flex; gap: 2rem;
-            height: calc(100vh - 280px); min-height: 500px;
+            height: calc(100vh - 320px); min-height: 500px;
         }
         .panel {
             display: flex; flex-direction: column; flex: 1;
@@ -82,12 +83,15 @@
             border-radius: var(--radius-lg);
             padding: 1.5rem;
         }
-        .panel label {
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--text-secondary);
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 1rem;
         }
+        .panel-header label {
+            font-size: 1rem; font-weight: 500; color: var(--text-secondary);
+            margin: 0;
+        }
+        .panel-actions { display: flex; gap: 0.75rem; }
         .editor-container {
             flex-grow: 1;
             border-radius: var(--radius-md);
@@ -107,6 +111,25 @@
             background-color: var(--bg-light); color: var(--text-secondary);
             cursor: not-allowed; transform: none; box-shadow: none;
         }
+        .btn-icon {
+            background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary);
+            padding: 8px 12px; font-size: 0.8rem; font-weight: 500;
+            border-radius: var(--radius-md); margin-top: 0;
+        }
+        .btn-icon:hover:not(:disabled) { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+        .btn-icon:disabled { opacity: 0.5; }
+
+        .supported-obfuscators { margin-top: 5rem; }
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; max-width: 400px; margin: 0 auto; }
+        .status-card {
+            background-color: var(--bg-light); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            padding: 1.5rem; display: flex; align-items: center; gap: 1rem;
+        }
+        .status-card .status-indicator { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .status-indicator.online { background-color: #22c55e; box-shadow: 0 0 8px #22c55e; }
+        .status-card h3 { font-size: 1rem; font-weight: 500; color: var(--text-primary); }
+        .status-card p { font-size: 0.9rem; font-weight: 400; color: var(--text-secondary); margin: 0; }
+
         footer { padding: 4rem 0; border-top: 1px solid var(--border-color); margin-top: 40px; text-align: center; }
         .footer-content { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
         
@@ -142,16 +165,40 @@
                 </div>
                 <div class="dumper-container">
                     <div class="panel">
-                        <label for="input-editor">Obfuscated Code:</label>
+                        <div class="panel-header">
+                            <label for="input-editor">Obfuscated Code:</label>
+                        </div>
                         <div class="editor-container">
                             <div id="input-editor" style="width:100%;height:100%;"></div>
                         </div>
                         <button id="dump-button" class="btn btn-primary">Deobfuscate</button>
                     </div>
                     <div class="panel">
-                        <label for="output-editor">Result:</label>
+                        <div class="panel-header">
+                            <label for="output-editor">Result:</label>
+                            <div class="panel-actions">
+                                <button id="copy-button" class="btn btn-icon" disabled><i class="fa-solid fa-copy"></i> Copy</button>
+                                <button id="download-button" class="btn btn-icon" disabled><i class="fa-solid fa-download"></i> Download</button>
+                            </div>
+                        </div>
                         <div class="editor-container">
                              <div id="output-editor" style="width:100%;height:100%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="supported-obfuscators">
+                    <div class="section-header">
+                        <h2>Currently Supported</h2>
+                        <p>Our dumper is continuously updated. Here is the current status of supported obfuscators.</p>
+                    </div>
+                    <div class="status-grid">
+                        <div class="status-card">
+                            <div class="status-indicator online"></div>
+                            <div>
+                                <h3>WeAreDevs Obfuscator</h3>
+                                <p>Supported</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -168,15 +215,15 @@
 
     <script>
         const dumpButton = document.getElementById('dump-button');
-        const inputEditorContainer = document.getElementById('input-editor');
-        const outputEditorContainer = document.getElementById('output-editor');
+        const copyButton = document.getElementById('copy-button');
+        const downloadButton = document.getElementById('download-button');
         const DUMPER_API_URL = 'https://absent-modification-concentrations-seat.trycloudflare.com/dump';
 
         let inputEditor, outputEditor;
 
         require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }});
         require(['vs/editor/editor.main'], function() {
-            inputEditor = monaco.editor.create(inputEditorContainer, {
+            inputEditor = monaco.editor.create(document.getElementById('input-editor'), {
                 value: '-- Paste your obfuscated script here...',
                 language: 'lua',
                 theme: 'vs-dark',
@@ -185,7 +232,7 @@
                 scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
             });
 
-            outputEditor = monaco.editor.create(outputEditorContainer, {
+            outputEditor = monaco.editor.create(document.getElementById('output-editor'), {
                 value: '-- Your result will appear here...',
                 language: 'lua',
                 theme: 'vs-dark',
@@ -197,10 +244,13 @@
         });
 
         dumpButton.addEventListener('click', async () => {
+            if (!inputEditor) return;
             const code = inputEditor.getValue();
             if (!code) return;
 
             dumpButton.disabled = true;
+            copyButton.disabled = true;
+            downloadButton.disabled = true;
             dumpButton.textContent = 'Deobfuscating...';
             outputEditor.setValue('-- Working its magic, please wait...');
 
@@ -215,12 +265,42 @@
                 const resultText = response.ok ? (data.result || '-- Empty or invalid result.') : `-- Error: ${data.error}`;
                 outputEditor.setValue(resultText);
 
+                if(response.ok && data.result) {
+                    copyButton.disabled = false;
+                    downloadButton.disabled = false;
+                }
+
             } catch (err) {
                 outputEditor.setValue('-- Error: Could not connect to the dumper server.\n-- The service might be offline or blocked by your network.');
             } finally {
                 dumpButton.disabled = false;
                 dumpButton.textContent = 'Deobfuscate';
             }
+        });
+
+        copyButton.addEventListener('click', () => {
+            if (!outputEditor) return;
+            navigator.clipboard.writeText(outputEditor.getValue()).then(() => {
+                const originalText = copyButton.innerHTML;
+                copyButton.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
+                setTimeout(() => {
+                    copyButton.innerHTML = originalText;
+                }, 2000);
+            });
+        });
+
+        downloadButton.addEventListener('click', () => {
+            if (!outputEditor) return;
+            const code = outputEditor.getValue();
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'deobfuscated_script.lua';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         });
     </script>
 </body>
